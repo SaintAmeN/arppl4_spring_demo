@@ -40,6 +40,7 @@ public class StudentController {
         this.studentRepository = studentRepository;
     }
 
+    //<editor-fold desc="CRUD>
     @GetMapping
     public List<Student> studentList() {
         log.info("Wywołano metodę studentList");
@@ -90,10 +91,22 @@ public class StudentController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public void createStudent(@RequestBody Student student){
+    public void createStudent(@RequestBody Student student) {
         log.info("Wywołano metodę createStudent: " + student);
 
         studentRepository.save(student);
+    }
+    //</editor-fold>
+
+    // Request Param - parametr zapytania
+    // Select * from Student s where s.name LIKE %Gawel%
+    // http://localhost:8080/api/student/findByName?name=Gawel
+    @GetMapping("/findByName")
+    public List<Student> findStudentByName(@RequestParam(name = "name") String searchedName) {
+        log.info("Wywołano metodę findStudentByName: " + searchedName);
+
+        return studentRepository.findAllByNameLike("%" + searchedName + "%");
+//        return studentRepository.findAllByNameContaining(searchedName);
     }
 }
 
