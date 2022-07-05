@@ -15,4 +15,4 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findAllByName(String name);
 }
 
-// [...] -> [...] -> [Repository]
+// USER -> || -> [Controller] -> [...] -> [Repository]

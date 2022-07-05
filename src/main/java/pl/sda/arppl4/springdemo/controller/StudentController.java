@@ -1,11 +1,13 @@
 package pl.sda.arppl4.springdemo.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.sda.arppl4.springdemo.model.Student;
 import pl.sda.arppl4.springdemo.repository.StudentRepository;
+import pl.sda.arppl4.springdemo.service.StudentService;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -32,20 +34,17 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/student")
 @RestController()
+@RequiredArgsConstructor
 public class StudentController {
 
-    private StudentRepository studentRepository; // Autowired
-
-    public StudentController(StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
-    }
+    private final StudentService studentService;
 
     //<editor-fold desc="CRUD>
     @GetMapping
     public List<Student> studentList() {
         log.info("Wywołano metodę studentList");
 
-        List<Student> studentList = studentRepository.findAll();
+        List<Student> studentList = studentService.findAll();
 
         return studentList;
     }
@@ -56,12 +55,7 @@ public class StudentController {
     public Student findStudent(@PathVariable(name = "identifier") Long studentId) {
         log.info("Wywołano metodę findStudent: " + studentId);
 
-        Optional<Student> studentOptional = studentRepository.findById(studentId);
-        if (studentOptional.isPresent()) {
-            Student student = studentOptional.get();
-            return student;
-        }
-        throw new EntityNotFoundException("Nie znaleziono studenta o id: " + studentId);
+        return studentService.findById(studentId);
     }
 
     // REST -> Representation State Transfer
@@ -72,7 +66,7 @@ public class StudentController {
     public void deleteStudent(@PathVariable(name = "identifier") Long studentId) {
         log.info("Wywołano metodę deleteStudent: " + studentId);
 
-        studentRepository.deleteById(studentId);
+        studentService.deleteById(studentId);
     }
 
     // Request Param - parametr zapytania
@@ -81,12 +75,7 @@ public class StudentController {
     public Student findStudentById(@RequestParam(name = "studentId") Long studentId) {
         log.info("Wywołano metodę findStudentById: " + studentId);
 
-        Optional<Student> studentOptional = studentRepository.findById(studentId);
-        if (studentOptional.isPresent()) {
-            Student student = studentOptional.get();
-            return student;
-        }
-        throw new EntityNotFoundException("Nie znaleziono studenta o id: " + studentId);
+        return studentService.findById(studentId);
     }
 
     @PostMapping()
@@ -94,7 +83,7 @@ public class StudentController {
     public void createStudent(@RequestBody Student student) {
         log.info("Wywołano metodę createStudent: " + student);
 
-        studentRepository.save(student);
+        studentService.save(student);
     }
     //</editor-fold>
 
@@ -105,12 +94,11 @@ public class StudentController {
     public List<Student> findStudentByName(@RequestParam(name = "name") String searchedName) {
         log.info("Wywołano metodę findStudentByName: " + searchedName);
 
-        return studentRepository.findAllByNameLike("%" + searchedName + "%");
-//        return studentRepository.findAllByNameContaining(searchedName);
+        return studentService.findAllByNameContaining(searchedName);
     }
 }
 
 // RestController -> Zwraca DANE!
-// Controller     -> Zwraca HTML - nie na dzisiaj
+// Controller     -> Zwraca HTML - zwraca wygląd strony
 //
-// [Controller] -> [ -> ] -> [Repository]
+// [Controller] -> [ Service ] -> [Repository]
